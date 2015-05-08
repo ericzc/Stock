@@ -8,30 +8,32 @@ _SUMMARY_STOCK_DB_NAME = 'Stock.db'
 
 
 #define the cache class
-class memcache():
-    def __init__(self,fn):
-        self.fn = fn
-        self.cachedic={}
-        pass
 
-    def refresh(self):
+
+
+def memcache(fn):
+    cachedic = {}
+
+    def wrapper(*args):
+        #args[0] is the self pointer
+        #args[1] is the str likt v_shxxxx+201550232+....
+        #print args
+        tmp_str = str(args[1])+args[2]
+        #print 'cache str :'+ tmp_str
         stamp = int(time.time())
-        for (ky,va) in self.cachedic.items():
-            if stamp - va >= 300:
-                del self.cache[ky]
-
-    def __call__(self,*args):
-            assert isinstance(args[0],tuple)
-            tmp_str = str(args[0])
-            if tmp_str not in self.cachedic:
-                stamp = int(time.time())
-                self.cachedic[tmp_str]=stamp
-                self.refresh()
-                return self.fn(self.obj,args[0])
-            else:
-                self.refresh()
-                pass
-        return wrapper
+        if tmp_str not in cachedic:
+            cachedic[tmp_str] = stamp
+            for (ky, va) in cachedic.items():
+                if stamp - va >= 300:
+                    del cachedic[ky]
+            return fn( *args )
+        else:
+            print'found the same in cache!'
+            for (ky, va) in cachedic.items():
+                if stamp - va >= 300:
+                    del cachedic[ky]
+            pass
+    return wrapper
 
 
 
@@ -99,34 +101,33 @@ class stockdbtool:
     #         self.priv_refreshcache()
     #         return False
 
-    @staticmethod
     @memcache
-    def priv_insert_realtime_trade_db(table_name,value_tuple):
+    def priv_insert_realtime_trade_db(self, value_tuple , tname ):
         #trade table
         #  time price volume type money
         #
         # for realtime we first check the cache to see if the value is already exist
-        sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?)' % table_name )
-        self.cur.execute(sqlexe,value_tuple)
-        print 'insert new data for '+table_name +' : '+ str(value_tuple)
+        sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?)' % self.table_name )
+        self.cur.execute(sqlexe, value_tuple)
+        print 'insert new data for '+self.table_name + ' : ' + str(value_tuple)
 
     @memcache
-    def priv_summary_stock_db(self,table_name,value_tuple):
+    def priv_summary_stock_db(self,value_tuple, tname):
         # summary table
         # stock_code stock_name current_price last_price today_open
         # deal_volume deal_money outside inside fluctuate fluctuate_percent
         # highest lowest exchange enterprise_ratio 
         #
-        sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)' %table_name)
-        self.cur.execute(sqlexe,value_tuple)
+        sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)' % self.table_name)
+        self.cur.execute(sqlexe, value_tuple)
         
         
-    def InsertDB(self,value_tuple):
+    def InsertDB(self, value_tuple):
         if self.type == 1:
             #RealTime trade db
-            self.priv_insert_realtime_trade_db(value_tuple)
+            self.priv_insert_realtime_trade_db(value_tuple, self.table_name)
         else:
-            self.priv_summary_stock_db(value_tuple)
+            self.priv_summary_stock_db(value_tuple, self.table_name)
 
     def CommitDB(self):
         self.conn.commit()

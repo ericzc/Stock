@@ -5,18 +5,45 @@ import time
 
 
 
-def my_job():
-   print int(time.time())
-# Start the scheduler
-sched = Scheduler()
-sched.start()
-
-#start the morning
-job = sched.add_cron_job(my_job,day_of_week='0,1,2,3,4',hour='9',minute='30')
-#stop the morning
 
 
-while(True):
-    print 'my sleep'+str(int(time.time()))
-    time.sleep(1000000)
-    pass
+
+
+def Dector(fn):
+    a = []
+    def wrapper(*args):
+        print args
+
+        a.append(args[1])
+        print a
+
+        return fn(*args)
+    return wrapper
+
+
+
+
+
+class myfunc():
+    def __init__(self):
+        pass
+
+    @Dector
+    def calculate(self, num):
+        print'num is ' +num
+
+a = myfunc()
+a.calculate('3')
+a.calculate('4')
+a.calculate('5')
+
+b = myfunc()
+b.calculate('7')
+b.calculate('8')
+b.calculate('9')
+
+
+
+
+
+

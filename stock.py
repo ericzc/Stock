@@ -129,9 +129,9 @@ def main():
     print'start!'
     sched.start()
     jobstartmorning = sched.add_cron_job(jobA,day_of_week='0,1,2,3,4',hour='9',minute='30')
-    #josstopmorning = sched.add_cron_job(stopjob,day_of_week='0,1,2,3,4',hour='11',minute='32',args=[jobstartmorning])
+
     jobstartnoon = sched.add_cron_job(jobA,day_of_week='0,1,2,3,4',hour='13',minute='0')
-    #jobstopnoon = sched.add_cron_job(stopjob,day_of_week='0,1,2,3,4',hour='15',minute='0',args=[jobstartnoon])
+
     
     jobsummarystart = sched.add_cron_job(jobB,day_of_week='0,1,2,3,4',hour='20',minute='0')
 
@@ -140,9 +140,11 @@ def main():
         jobA()
     if AmaxB(now_time,'13:00:00')  and AmaxB('15:32:00',now_time) :
         jobA()
+
+
     while(True):
         #getrealtimedata(STOCK_LIST)
-        print'in while!'
+        print'waiting for the next trace!!'
         time.sleep(100)
     
 if __name__ == "__main__":
