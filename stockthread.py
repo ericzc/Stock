@@ -2,54 +2,47 @@
 
 __author__ = 'eric'
 
-import threading
+from threading import Thread
 import random
 
-class stockworker(threading.Thread):
-
-    def __init__(self, task, param=()):
-        super(stockworker,self).__init__()
-        self.task = task
-        self.param = param
-
-    def run(self):
-
-        try:
-            self.task(self.param)
-        except Exception:
-            print ' ooh exception in thread :'+self.getName()
 
 
-#
-
-class stockthreadpool():
+class StockThreadPool():
 
 
-    def __init__(self):
-        self.pool = {}
+    def __init__(self, num):
+        self.max = num
+        self.tid2thread = {}
 
-    def gettask(self,id):
-        return None if id not in self.pool.values() else self.pool[id]
+    #def gettask(self,id):
+    #    return None if id not in self.pool.values() else self.pool[id]
 
-    def addtask(self, task, param = ()):
-        worker = stockworker(task,param)
-        id = self.generateid()
-        self.pool[id] = worker
-        return id
+    def add_task(self, task, param ):
+        trd = Thread(target = task, args=(param,))
+        tid = self._generate_id()
+        self.tid2thread[tid] = trd
+        return tid
 
-    def runtask(self,id):
-        self.pool[id].start()
+    def start_task(self,tid):
+        self.tid2thread[tid].start()
 
-    def runalltask(self):
-        for id in self.pool.keys():
-            self.pool[id].start()
+    def start_all_task(self):
+        for tid in self.tid2thread.keys():
+            self.tid2thread[tid].start()
 
 
-    def generateid(self):
-        id = random.randint(1,100000)
-        while( id in self.pool.values()):
-            id = random.randint(1,100000)
-        return id
+    def _generate_id(self):
+        tid = random.randint(1,100000)
+        while tid in self.tid2thread.keys():
+            tid = random.randint(1,100000)
+        return tid
+
+    def is_all_dead(self):
+        for tid in self.tid2thread.keys():
+            if self.tid2thread[tid].isAlive():
+                return False
+        return True
+
 
 
 
