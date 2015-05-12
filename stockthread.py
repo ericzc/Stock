@@ -20,7 +20,7 @@ class stockworker(threading.Thread):
             print ' ooh exception in thread :'+self.getName()
 
 
-
+#
 
 class stockthreadpool():
 
