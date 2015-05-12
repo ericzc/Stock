@@ -102,6 +102,8 @@ def getsummarydata(stock_list):
  
 
 def jobA():
+    dt = strftime('%b %d %Y %H:%M:%S ', localtime())
+    print 'start jobA is running at time :' + dt
     while(True):
         getrealtimedata(STOCK_LIST)
         time.sleep(5)
@@ -112,6 +114,8 @@ def jobA():
             return None
         
 def jobB():
+    dt = strftime('%b %d %Y %H:%M:%S ', localtime())
+    print 'start jobB is running at time :' + dt
     getsummarydata(STOCK_LIST)
 
 
