@@ -24,6 +24,7 @@ class StockThreadPool():
         return tid
 
     def start_task(self,tid):
+        print 'starting the thread : ' + self.tid2thread[tid].getName()
         self.tid2thread[tid].start()
 
     def start_all_task(self):

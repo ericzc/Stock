@@ -13,8 +13,9 @@
 '''
 import datetime
 from tools import AmaxB
-from time import strftime, localtime,time
+from time import strftime, localtime,time, sleep
 from stockdb import stockdbtool
+import requests
 
 
 
@@ -38,7 +39,7 @@ def real_time_task( *args ):
         if AmaxB(now_time,'15:02:00') :
             return None
         retrive_realtime_data( args[0] , conn_dic )
-        time.sleep(5)
+        sleep(5)
 
 
 
@@ -67,7 +68,7 @@ def retrive_realtime_data( stklist, conn_dic ):
             dbtool = stockdbtool(itm[0], 1)
             dbtool.ConnectDB()
             conn_dic[itm[0]] = dbtool
-            print'add new dbtool!'
+            #print'add new dbtool!'
         dbtool = conn_dic[itm[0]]
         des = eval(itm[1]).split('~')
         bs = des[29].split('|')
@@ -78,4 +79,30 @@ def retrive_realtime_data( stklist, conn_dic ):
             dbtool.InsertDB(v_tuple)
         dbtool.CommitDB()
     #print 'all done!'
+
+def day_summary_task( *args ):
+    if self._stock_list is None:
+        return
+
+    for stock in self._stock_list:
+        url = URL_ROOT+stock
+        r = requests.get(url)
+        if r.status_code != 200:
+            print 'wrong!'
+            raise ValueError('bad requests result!')
+        s = r.content.decode('gbk')
+        s = s.strip(';\n')
+        s = s.split('=')
+        des = eval(s[1]).split('~')
+        dbtool = stockdbtool(s[0], 2)
+        dbtool.ConnectDB()
+
+        tm = str(datetime.date.today())
+        v_tuple=(tm, des[2], des[1], des[3], des[4], des[5], des[36], des[37], des[7],
+                     des[8], des[31], des[32], des[41], des[42], des[38], des[39])
+
+        print 'inster data :' + v_tuple[1] +' '+str(v_tuple).decode('gbk')
+        dbtool.InsertDB(v_tuple)
+        dbtool.CommitDB()
+        dbtool.CloseDB()
 

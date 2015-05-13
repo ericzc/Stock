@@ -126,6 +126,8 @@ def main():
 
     mgr = Manager()
     mgr.add_stocklist( STOCK_LIST )
+    mgr.start_realtime()
+
 
     sched.start()
     jobstartmorning = sched.add_cron_job(mgr.start_realtime(),day_of_week='0,1,2,3,4',hour='9',minute='30')

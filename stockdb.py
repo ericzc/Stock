@@ -9,6 +9,22 @@ _SUMMARY_STOCK_DB_NAME = 'Stock.db'
 
 #define the cache class
 
+def shortalert(fn):
+
+    def wrapper(*args):
+        #print 'in short alert ' +str(args)
+        if isinstance(args[1],tuple):
+            #print args[1]
+            #process the trade
+            if int(args[1][3])/100 >= 2000:
+                if args[1][4] == 'S':
+                    print args[2] +' short alert ! ! Active Sell ('+ str(int(args[1][3])/100)+')'
+                elif args[1][4] == 'B':
+                    print args[2] + ' short alert !! Active Buy (' +str(int(args[1][3])/100)+')'
+            return fn(*args)
+
+
+    return wrapper
 
 
 def memcache(fn):
@@ -19,7 +35,7 @@ def memcache(fn):
         #args[1] is the str likt v_shxxxx+201550232+....
         #print args
         tmp_str = str(args[1])+args[2]
-        #print 'cache str :'+ tmp_str
+        #print 'in memcache cache str :'+ tmp_str
         stamp = int(time.time())
         if tmp_str not in cachedic:
             cachedic[tmp_str] = stamp
@@ -28,7 +44,7 @@ def memcache(fn):
                     del cachedic[ky]
             return fn( *args )
         else:
-            print'found the same in cache!'
+            #print'found the same in cache!'
             for (ky, va) in cachedic.items():
                 if stamp - va >= 300:
                     del cachedic[ky]
@@ -39,7 +55,7 @@ def memcache(fn):
 
 class stockdbtool:
     def __init__(self,table_name ,type):
-        print 'init db for table %s' % table_name
+        #print 'init db for table %s' % table_name
         self.table_name = table_name
         self.type = type
         self.conn = None
@@ -102,6 +118,7 @@ class stockdbtool:
     #         return False
 
     @memcache
+    @shortalert
     def priv_insert_realtime_trade_db(self, value_tuple , tname ):
         #trade table
         #  time price volume type money
@@ -109,7 +126,9 @@ class stockdbtool:
         # for realtime we first check the cache to see if the value is already exist
         sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?)' % self.table_name )
         self.cur.execute(sqlexe, value_tuple)
-        print 'insert new data for '+self.table_name + ' : ' + str(value_tuple)
+        #print 'insert new data for '+self.table_name + ' : ' + str(value_tuple)
+
+
 
     @memcache
     def priv_summary_stock_db(self,value_tuple, tname):
@@ -118,6 +137,7 @@ class stockdbtool:
         # deal_volume deal_money outside inside fluctuate fluctuate_percent
         # highest lowest exchange enterprise_ratio 
         #
+
         sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)' % self.table_name)
         self.cur.execute(sqlexe, value_tuple)
         
