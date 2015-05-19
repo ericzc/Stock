@@ -4,6 +4,8 @@
 from stockthread import StockThreadPool
 from threadimp import real_time_task
 import time
+import requests
+from threadimp import URL_ROOT
 
 class Manager():
 

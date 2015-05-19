@@ -1,146 +1,22 @@
-
-# -*- coding: utf-8 -*-
-
+# -*- coding:utf-8 -*-
 
 
-import os
-import time
-from time import localtime,strftime
-import datetime
-from apscheduler.scheduler import Scheduler
-from manager import Manager
+import requests
+from threadimp import URL_ROOT
+
+class Stock():
+    def __init__(self,code='',name=''):
+        self.code = code
+        self.name = name
 
 
-sched = Scheduler()
+    def setStock(self,code,name):
+        self.code = code
+        self.name = name
 
-STOCK_LIST = [
-
-              'sz000725',
-              'sh600307',
-              'sh600010',
-              'sz000825',
-              'sh601390'
-              ]
-#
-#
-# class Stock():
-#
-#     def __init__(self, stock_list=None):
-#         self._stock_list = stock_list
-#         self._stock_conn_dic = {}
-#         self.threadspool = stockthread.stockthreadpool()
-#         self._stock_cache ={}
-#
-#
-#     def getrtmdata(self ):
-#         #check if the stock_list is None
-#         if self._stock_list is None:
-#             return
-#
-#         url = URL_ROOT+self._stock_list[0]
-#         for stock in self._stock_list[1:]:
-#             url = url+','+stock
-#
-#         r = requests.get(url)
-#         if r.status_code != 200:
-#             print 'wrong'
-#             raise ValueError('bad requests results!')
-#
-#         s = r.content.decode('gbk')
-#         s = s.strip('\n')
-#         s = s.split('\n')
-#         tm = str(datetime.date.today())
-#         for itm in s:
-#             itm = itm.strip(';')
-#             itm = itm.split('=')
-#
-#             if itm[0] not in self._stock_conn_dic.keys():
-#                 dbtool = stockdbtool(itm[0], 1)
-#                 dbtool.ConnectDB()
-#                 self._stock_conn_dic[itm[0]] = dbtool
-#                 self._stock_cache[itm[0]] =[]
-#                 #self.threadspool.addtask()
-#                 print'add new dbtool!'
-#             dbtool = self._stock_conn_dic[itm[0]]
-#             des = eval(itm[1]).split('~')
-#             bs = des[29].split('|')
-#             for tmp in bs:
-#                 tmp = tmp.split('/')
-#                 v_tuple=(tm,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4])
-#                 self._stock_cache[itm[0]].append(v_tuple)
-#                 #print des[1]+'  recv data : '+str(v_dic_itm)
-#                 dbtool.InsertDB(v_tuple)
-#
-#             dbtool.CommitDB()
-#         #print 'all done!'
-#
-#
-#     def getsummarydata(self):
-#         if self._stock_list is None:
-#             return
-#
-#         for stock in self._stock_list:
-#             url = URL_ROOT+stock
-#             r = requests.get(url)
-#             if r.status_code != 200:
-#                 print 'wrong!'
-#                 raise ValueError('bad requests result!')
-#             s = r.content.decode('gbk')
-#             s = s.strip(';\n')
-#             s = s.split('=')
-#             des = eval(s[1]).split('~')
-#             dbtool = stockdbtool(s[0], 2)
-#             dbtool.ConnectDB()
-#
-#             tm = str(datetime.date.today())
-#             v_tuple=(tm, des[2], des[1], des[3], des[4], des[5], des[36], des[37], des[7],
-#                          des[8], des[31], des[32], des[41], des[42], des[38], des[39])
-#
-#             print 'inster data :' + v_tuple[1] +' '+str(v_tuple).decode('gbk')
-#             dbtool.InsertDB(v_tuple)
-#             dbtool.CommitDB()
-#             dbtool.CloseDB()
-#
-#
-#
-#     def jobrt(self):
-#
-#
-#     def schedulertjob(self):
-#         self.threadspool.addtask(self.jobrt)
-#         self.threadspool.runalltask()
-#
-#     def jobsm(self):
-#         self.getsummarydata()
-#
-#     def schedulejob(self):
-#         sched.start()
-#         jobstartmorning = sched.add_cron_job(self.jobrt,day_of_week='0,1,2,3,4',hour='9',minute='30')
-#         jobstartnoon = sched.add_cron_job(self.jobrt,day_of_week='0,1,2,3,4',hour='13',minute='0')
-#         jobsummarystart = sched.add_cron_job(self.jobsm,day_of_week='0,1,2,3,4',hour='20',minute='0')
+    def getStockInfo(self):
+        url = URL_ROOT+code
+        r = requests.get(url)
 
 
 
-
-def main():
-
-    mgr = Manager()
-    mgr.add_stocklist( STOCK_LIST )
-    mgr.start_realtime()
-
-
-    sched.start()
-    jobstartmorning = sched.add_cron_job(mgr.start_realtime(),day_of_week='0,1,2,3,4',hour='9',minute='30')
-    jobstartnoon = sched.add_cron_job(mgr.start_realtime(),day_of_week='0,1,2,3,4',hour='13',minute='0')
-    #jobsummarystart = sched.add_cron_job(mgr.start_realtime(),day_of_week='0,1,2,3,4',hour='20',minute='0')
-
-    while(True):
-        print'waiting for the next trace!!'
-        time.sleep(100)
-    
-if __name__ == "__main__":
-    main()       
-        
-        
-        
-        
