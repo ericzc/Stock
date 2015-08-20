@@ -71,29 +71,7 @@ class stockdbtool:
     def priv_connect_summary_stock_db(self,tn):
         self.conn = sqlite3.connect(_SUMMARY_STOCK_DB_NAME)
         self.conn.text_factory = str
-        self.cur = self.conn.cursor()
-        # summary table
-        # stock_code stock_name current_price last_price today_open
-        # deal_volume deal_money outside inside fluctuate fluctuate_percent
-        # highest lowest exchange enterprise_ratio 
-        self.cur.execute('CREATE TABLE IF NOT EXISTS %s(  \
-                                                        stock_date date, \
-                                                        stock_code text, \
-                                                        stock_name text, \
-                                                        current_price text, \
-                                                        last_price text, \
-                                                        today_open text,  \
-                                                        deal_volume, \
-                                                        deal_money, \
-                                                        outside, \
-                                                        inside, \
-                                                        fluctuate, \
-                                                        fluctuate_percent, \
-                                                        highest, \
-                                                        lowest, \
-                                                        exchange, \
-                                                        enterprise_ratio \
-                                                        )' % tn)
+
         
     def ConnectDB(self):
         if self.type == DB_DESCRIBE_DIC['DB_REALTIME']:
@@ -133,8 +111,7 @@ class stockdbtool:
                                                         type text, \
                                                         money text)" % tname)
 
-
-        sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?)' % self.table_name )
+        sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?)' % tname )
         self.cur.execute(sqlexe, value_tuple)
         #print 'insert new data for '+self.table_name + ' : ' + str(value_tuple)
 
@@ -148,15 +125,36 @@ class stockdbtool:
         # highest lowest exchange enterprise_ratio 
         #
 
-        self.conn
+        self.cur = self.conn.cursor()
+        # summary table
+        # stock_code stock_name current_price last_price today_open
+        # deal_volume deal_money outside inside fluctuate fluctuate_percent
+        # highest lowest exchange enterprise_ratio
+        self.cur.execute('CREATE TABLE IF NOT EXISTS %s(  \
+                                                        stock_date date, \
+                                                        stock_code text, \
+                                                        stock_name text, \
+                                                        current_price text, \
+                                                        last_price text, \
+                                                        today_open text,  \
+                                                        deal_volume, \
+                                                        deal_money, \
+                                                        outside, \
+                                                        inside, \
+                                                        fluctuate, \
+                                                        fluctuate_percent, \
+                                                        highest, \
+                                                        lowest, \
+                                                        exchange, \
+                                                        enterprise_ratio \
+                                                        )' % tname)
 
         sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)' % tname)
         self.cur.execute(sqlexe, value_tuple)
         
         
-    def InsertDB(self, table_name,value_tuple):
+    def InsertDB(self,table_name,value_tuple):
         if self.type == DB_DESCRIBE_DIC['DB_REALTIME']:
-            #RealTime trade db
             self.priv_insert_realtime_trade_db(value_tuple, table_name)
         elif self.type == DB_DESCRIBE_DIC['DB_SUMMARY']:
             self.priv_summary_stock_db(value_tuple, table_name)
