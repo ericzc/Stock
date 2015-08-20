@@ -19,7 +19,6 @@ import requests
 
 
 
-URL_ROOT = 'http://qt.gtimg.cn/q='
 
 def real_time_task( *args ):
     '''

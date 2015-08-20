@@ -53,20 +53,21 @@ def memcache(fn):
 
 
 
+DB_DESCRIBE_DIC={'DB_REALTIME':1,'DB_SUMMARY':2}
+
 class stockdbtool:
-    def __init__(self,table_name ,type):
+    def __init__(self,typestring):
         #print 'init db for table %s' % table_name
-        self.table_name = table_name
-        self.type = type
+        self.type = DB_DESCRIBE_DIC[typestring]
         self.conn = None
         self.cur = None
         self.cache = {}
+        self.tables= []
 
     def priv_connect_realtime_trade_db(self,tn):
         self.conn = sqlite3.connect(_REALTIME_TRADE_DB_NAME)
         self.conn.text_factory = str
-        self.cur = self.conn.cursor()
-        self.cur.execute("CREATE TABLE IF NOT EXISTS %s(stock_date date, time text, price text, volume text, type text, money text)" % tn)
+
     def priv_connect_summary_stock_db(self,tn):
         self.conn = sqlite3.connect(_SUMMARY_STOCK_DB_NAME)
         self.conn.text_factory = str
@@ -95,11 +96,10 @@ class stockdbtool:
                                                         )' % tn)
         
     def ConnectDB(self):
-        if self.type == 1:
-            #RealTime trade db
-            self.priv_connect_realtime_trade_db(self.table_name)
-        else :
-            self.priv_connect_summary_stock_db(self.table_name)
+        if self.type == DB_DESCRIBE_DIC['DB_REALTIME']:
+            self.priv_connect_realtime_trade_db(_REALTIME_TRADE_DB_NAME)
+        elif self.type == DB_DESCRIBE_DIC['DB_SUMMARY']:
+            self.priv_connect_summary_stock_db(_SUMMARY_STOCK_DB_NAME)
             
     # def priv_refreshcache(self):
 
@@ -124,6 +124,16 @@ class stockdbtool:
         #  time price volume type money
         #
         # for realtime we first check the cache to see if the value is already exist
+        self.cur = self.conn.cursor()
+        self.cur.execute("CREATE TABLE IF NOT EXISTS %s(\
+                                                        stock_date date,\
+                                                        time text, \
+                                                        price text, \
+                                                        volume text, \
+                                                        type text, \
+                                                        money text)" % tname)
+
+
         sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?)' % self.table_name )
         self.cur.execute(sqlexe, value_tuple)
         #print 'insert new data for '+self.table_name + ' : ' + str(value_tuple)
@@ -138,16 +148,18 @@ class stockdbtool:
         # highest lowest exchange enterprise_ratio 
         #
 
-        sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)' % self.table_name)
+        self.conn
+
+        sqlexe=format('INSERT INTO %s VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)' % tname)
         self.cur.execute(sqlexe, value_tuple)
         
         
-    def InsertDB(self, value_tuple):
-        if self.type == 1:
+    def InsertDB(self, table_name,value_tuple):
+        if self.type == DB_DESCRIBE_DIC['DB_REALTIME']:
             #RealTime trade db
-            self.priv_insert_realtime_trade_db(value_tuple, self.table_name)
-        else:
-            self.priv_summary_stock_db(value_tuple, self.table_name)
+            self.priv_insert_realtime_trade_db(value_tuple, table_name)
+        elif self.type == DB_DESCRIBE_DIC['DB_SUMMARY']:
+            self.priv_summary_stock_db(value_tuple, table_name)
 
     def CommitDB(self):
         self.conn.commit()
